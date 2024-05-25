@@ -1,0 +1,31 @@
+CREATE TABLE media (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL UNIQUE,
+  playCnt INTEGER DEFAULT 0 NOT NULL,
+  updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
+);
+
+ selectAll:
+ SELECT *
+ FROM media;
+
+ selectRecentPlayed:
+  SELECT *
+  FROM media
+  WHERE playCnt > 0 ORDER BY playCnt DESC LIMIT :limit;
+
+ insert:
+ INSERT OR IGNORE INTO media(title)
+ VALUES (?)
+ ON CONFLICT(title) DO UPDATE SET
+    updatedAt=strftime('%s', 'now'),
+    playCnt=playCnt + 1;
+
+ deleteById:
+ DELETE FROM media
+ WHERE id = ?;
+
+create:
+INSERT OR IGNORE INTO media(title)
+VALUES (?);

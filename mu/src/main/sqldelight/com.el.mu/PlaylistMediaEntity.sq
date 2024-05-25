@@ -1,0 +1,30 @@
+CREATE TABLE playlistMedia (
+    mediaId INTEGER NOT NULL,
+    playlistId INTEGER NOT NULL,
+    position INTEGER NOT NULL ,
+    updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    PRIMARY KEY (mediaId, playlistId),
+    CONSTRAINT fk_media_id
+    FOREIGN KEY(mediaId) REFERENCES media(id)
+    ON DELETE CASCADE,
+    CONSTRAINT fk_playlist_id
+    FOREIGN KEY(playlistId) REFERENCES playList(id)
+    ON DELETE CASCADE
+);
+
+ selectAll:
+ SELECT *
+ FROM media;
+
+ insert:
+ INSERT INTO playlistMedia(mediaId, playlistId, position)
+ VALUES (?, ?, ?);
+
+ deleteByMediaId:
+ DELETE FROM playlistMedia
+ WHERE mediaId = ?;
+
+ deleteByPlayListId:
+ DELETE FROM playlistMedia
+ WHERE playlistId = ?;

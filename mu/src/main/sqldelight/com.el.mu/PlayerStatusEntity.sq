@@ -1,0 +1,37 @@
+CREATE TABLE playerStatus (
+  playlistId TEXT NOT NULL,
+  mediaId TEXT NOT NULL,
+  positionMs INTEGER NOT NULL,
+  updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  CONSTRAINT fk_media_id
+  FOREIGN KEY(mediaId) REFERENCES media(id)
+  ON DELETE CASCADE,
+  CONSTRAINT fk_playlist_id
+  FOREIGN KEY(playlistId) REFERENCES playList(id)
+  ON DELETE CASCADE
+);
+
+ selectAll:
+ SELECT *
+ FROM playerStatus;
+
+ selectCurrent:
+ SELECT * FROM playerStatus
+ ORDER BY updatedAt DESC LIMIT 1;
+
+ insert:
+ INSERT INTO playerStatus(mediaId, playlistId, positionMs)
+ VALUES (?, ?, ?);
+
+ deleteByMediaId:
+ DELETE FROM playerStatus
+ WHERE mediaId = ?;
+
+ deleteByPlayListId:
+ DELETE FROM playerStatus
+ WHERE playlistId = ?;
+
+ selectCurrentPlaylist:
+ SELECT * FROM  playlistMedia
+ WHERE playlistId = (selectCurrent());

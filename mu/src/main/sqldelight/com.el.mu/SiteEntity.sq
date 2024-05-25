@@ -1,0 +1,17 @@
+CREATE TABLE site (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
+);
+
+selectAll:
+SELECT * FROM site;
+
+instert:
+INSERT INTO site(name)
+VALUES (?);
+
+delete:
+DELETE FROM site
+WHERE name = ?;

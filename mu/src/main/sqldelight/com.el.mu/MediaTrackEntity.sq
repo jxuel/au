@@ -1,0 +1,28 @@
+CREATE TABLE mediaTrack (
+    mediaId INTEGER NOT NULL,
+    trackId TEXT NOT NULL,
+    updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    PRIMARY KEY (mediaId, trackId),
+    CONSTRAINT fk_media_id
+    FOREIGN KEY(mediaId) REFERENCES media(id)
+    ON DELETE CASCADE,
+    CONSTRAINT fk_track_id
+    FOREIGN KEY(trackId) REFERENCES track(id)
+    ON DELETE CASCADE
+);
+
+selectByMediaId:
+SELECT * FROM mediaTrack WHERE mediaId = ?;
+
+insertWithMediaTitle:
+INSERT OR IGNORE INTO mediaTrack(trackId, mediaId)
+VALUES (:trackId, (SELECT id FROM media WHERE title == :title));
+
+deleteByMediaId:
+DELETE FROM mediaTrack
+WHERE mediaId = ?;
+
+deleteByTrackId:
+DELETE FROM mediaTrack
+WHERE trackId = ?;

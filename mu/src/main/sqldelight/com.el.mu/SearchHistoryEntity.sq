@@ -1,0 +1,22 @@
+CREATE TABLE searchHistory (
+  query TEXT NOT NULL PRIMARY KEY,
+  updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL
+);
+
+selectAll:
+SELECT *
+FROM searchHistory
+ORDER BY updatedAt DESC;
+
+insert:
+INSERT INTO searchHistory(query)
+VALUES (?);
+
+update:
+UPDATE searchHistory
+SET updatedAt = DATETIME('NOW')
+WHERE query = ?;
+
+delete:
+DELETE FROM searchHistory WHERE query = ?;

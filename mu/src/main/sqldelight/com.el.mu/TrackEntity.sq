@@ -1,0 +1,32 @@
+CREATE TABLE track (
+    id TEXT NOT NULL,
+    siteId INTEGER NOT NULL,
+    updatedAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    createdAt INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+    PRIMARY KEY (id, siteId),
+    CONSTRAINT fk_site
+    FOREIGN KEY(siteId) REFERENCES site(id)
+    ON DELETE CASCADE
+);
+
+selectAll:
+SELECT * FROM track;
+
+selectBySiteId:
+SELECT * FROM track
+WHERE siteId = ?;
+
+instert:
+INSERT OR IGNORE INTO  track(id, siteId)
+VALUES (?, ?);
+
+deleteById:
+DELETE FROM track
+WHERE id = ?;
+
+deleteBySiteId:
+DELETE FROM track
+WHERE siteId = ?;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

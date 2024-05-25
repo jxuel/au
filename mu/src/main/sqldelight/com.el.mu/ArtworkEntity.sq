@@ -1,0 +1,37 @@
+CREATE TABLE artwork (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  url TEXT NOT NULL,
+  height INTEGER NOT NULL,
+  width INTEGER NOT NULL,
+  media_id INTEGER NOT NULL,
+  area INTEGER GENERATED ALWAYS AS (height * width) NOT NULL,
+  updated_at INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  created_at INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
+  CONSTRAINT fk_media_id
+  FOREIGN KEY(media_id) REFERENCES media(id)
+  ON DELETE CASCADE
+);
+
+ selectAll:
+ SELECT *
+ FROM artwork;
+
+ insert:
+ INSERT INTO artwork(url, height, width, media_id)
+ VALUES (?, ?, ?,?);
+
+ insertWithMediaTitle:
+ INSERT OR IGNORE INTO artwork(url, height, width, media_id)
+ VALUES (:url, :height, :width, (SELECT id FROM media WHERE title == :title));
+
+ deleteById:
+ DELETE FROM artwork
+ WHERE id = ?;
+
+ selectByMediaId:
+  SELECT *
+  FROM artwork
+  WHERE media_id = ? ORDER BY area DESC;
+
+lastInsertRowId:
+SELECT last_insert_rowid();
