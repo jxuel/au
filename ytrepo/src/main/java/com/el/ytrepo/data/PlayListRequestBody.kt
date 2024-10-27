@@ -8,5 +8,5 @@ class PlayListRequestBody (
     var playlistId: String? = null,
     val tunerSettingValue: String? = null
 ) {
-    val context: Context = Context
+    val context: Context = Context.ANDROID
 }

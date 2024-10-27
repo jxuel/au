@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonInclude
 data class SearchRequestBody (
     val query: String,
     val params: String? = null) {
-    val context: Context = Context
+    val context: Context = Context.ANDROID
 }

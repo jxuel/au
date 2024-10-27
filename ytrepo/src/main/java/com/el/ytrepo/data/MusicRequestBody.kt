@@ -7,14 +7,30 @@ data class MusicRequestBody(
     val videoId: String,
     val playlistId: String? = null,
 ) {
-    val context: Context = Context
+    val context: Context = Context.IOS
 }
 
-data object Context {
-    data object Client {
-        val clientName = "ANDROID_MUSIC"
-        val clientVersion = "5.01"
+data class Context (
+    val client: Client
+) {
+    data class Client (
+        val clientName: String,
+        val clientVersion: String,
+    ) {
     }
-    val client: Client = Client
+    companion object {
+        val ANDROID = Context (
+            Client(clientName = "ANDROID_MUSIC",
+                 clientVersion = "5.01"
+            )
+
+        )
+        val IOS = Context (
+            Client(clientName = "IOS",
+                clientVersion = "19.29.1"
+            )
+
+        )
+    }
 }
 
