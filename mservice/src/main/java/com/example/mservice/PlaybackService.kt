@@ -3,8 +3,13 @@ package com.example.mservice
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.OptIn
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.datasource.DataSource
@@ -29,6 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -58,6 +64,13 @@ class PlaybackService : MediaSessionService() {
     @Named("uriCache")
     lateinit var uriCache: ConcurrentHashMap<String, MediaURICache>
 
+    @Inject
+    @Named("ds")
+    lateinit var dataStore: DataStore<Preferences>
+    val lMediaId = stringPreferencesKey("media_id")
+    val lTitle = stringPreferencesKey("title")
+    val lArtUri = stringPreferencesKey("art_uri")
+    val lArtist = stringPreferencesKey("artist")
     companion object {
         const val CHUNK_LENGTH = 512 * 1024L
     }
@@ -90,24 +103,50 @@ class PlaybackService : MediaSessionService() {
                     CoroutineScope(Dispatchers.IO).launch {
                         // Your app is responsible for storing the playlist and the start position
                         // to use here
-                        val resumptionPlaylist = restorePlaylist()
-                        settable.set(resumptionPlaylist)
+                        settable.set(MediaSession.MediaItemsWithStartPosition(listOf(loadLast()), 0, 0))
                     }
                     return settable
                 }
             }).build()
     }
 
-    private fun restorePlaylist(): MediaSession.MediaItemsWithStartPosition {
-        val mediaItem =
-            MediaItem.Builder().setMediaId("DhwFD2kmJy").setUri("youtube://music/DhwFD2kmJy")
-                .build()
-        return MediaSession.MediaItemsWithStartPosition(listOf(mediaItem), 0, 0)
+    private suspend fun loadLast(): MediaItem {
+        val lastMedia = dataStore.data.first()
+        return MediaItem.Builder()
+            .setMediaId(lastMedia[lMediaId] ?: "")
+            .setUri("youtube://music/${lastMedia[lMediaId]}")
+            //.setMimeType("audio/opus")
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(lastMedia[lTitle])
+                    .setArtworkUri(Uri.parse(lastMedia[lArtUri] ?: ""))
+                    .setArtist(lastMedia[lArtist])
+                    .build()
+            ).build()
     }
 
+    private suspend fun saveLast(item: MediaItem) {
+        dataStore.edit { lastMedia ->
+            lastMedia[lMediaId] = item.mediaId
+            item.mediaMetadata.title?.let {t->
+                lastMedia[lTitle] = t.toString()
+            }
+            item.mediaMetadata.artworkUri?.let {u->
+                lastMedia[lArtUri] = u.toString()
+            }
+            item.mediaMetadata.artist?.let {a->
+                lastMedia[lArtist] = a.toString()
+            }
+        }
+    }
     // Remember to release the player and media session in onDestroy
     override fun onDestroy() {
         mediaSession?.run {
+            player.currentMediaItem?.let { item->
+                runBlocking(Dispatchers.IO) {
+                    saveLast(item)
+                }
+            }
             player.release()
             release()
             mediaSession = null

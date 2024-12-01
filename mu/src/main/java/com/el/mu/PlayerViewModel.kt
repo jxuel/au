@@ -178,7 +178,7 @@ class PlayerViewModel @Inject constructor(
                 super.onIsPlayingChanged(isPlaying)
                 _isPlaying.value = isPlaying
                 if (isPlaying && !counted) {
-                    println("RRR ${mctl.mediaMetadata.title}")
+                    //println("RRR ${mctl.mediaMetadata.title}")
                     mediaEntityRepo.insert(mctl.mediaMetadata.title.toString())
                     counted = true
                 }

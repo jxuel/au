@@ -55,5 +55,7 @@ dependencies {
     // For exposing and controlling media sessions
     implementation("androidx.media3:media3-session:$media3_version")
     implementation("androidx.media3:media3-common:$media3_version")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
 
 }
