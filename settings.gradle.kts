@@ -14,7 +14,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "My Application"
-include(":app")
 include(":ytrepo")
 include(":mservice")
 include(":mu")

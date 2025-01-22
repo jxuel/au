@@ -1,6 +1,6 @@
 package com.el.mu
 
-import com.el.mu.ui.local.LocalAudio
+import com.el.mu.data.LocalAudio
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.OptIn
