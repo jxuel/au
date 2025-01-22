@@ -55,7 +55,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
 }
 // Allow references to generated code

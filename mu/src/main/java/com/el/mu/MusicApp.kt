@@ -27,8 +27,8 @@ import androidx.navigation.compose.composable
 import androidx.window.layout.DisplayFeature
 import com.el.mu.ui.home.HomeScreen
 import com.el.mu.ui.mimiply.Miniplayer
+import com.el.mu.ui.multitab.MultiTab
 import com.el.mu.ui.player.PlayerScreen
-import com.el.mu.ui.search.SearchScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -101,7 +101,7 @@ fun MusicApp(
                 composable(Screen.Search.route) {backStackEntry->
                     bEntry = backStackEntry
                     visableMiniply = true
-                    SearchScreen()
+                    MultiTab()
                 }
                 composable(Screen.Player.route) {
                     visableMiniply = false

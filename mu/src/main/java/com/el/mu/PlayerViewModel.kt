@@ -1,5 +1,6 @@
 package com.el.mu
 
+import com.el.mu.ui.local.LocalAudio
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.OptIn
@@ -35,6 +36,7 @@ class PlayerViewModel @Inject constructor(
 ) : ViewModel() {
     companion object {
         private val dImage = Uri.parse("android.resource://com.el.mu/" + R.raw.dds)
+        private val lImage = Uri.parse("android.resource://com.el.mu/" + R.raw.music_file)
         private val dTitle = "Nothing is playing now"
         private val TAG = PlayerViewModel::class.java.name
     }
@@ -63,6 +65,9 @@ class PlayerViewModel @Inject constructor(
 
     private var _isPlaying = MutableStateFlow<Boolean>(false)
     var isPlaying: StateFlow<Boolean> = _isPlaying
+    private var _repeatMode = MutableStateFlow<Int>(Player.REPEAT_MODE_OFF)
+    var repeatMode: StateFlow<Int> = _repeatMode
+
 
     fun initializedMctl(): Boolean {
         return ::mctl.isInitialized
@@ -87,7 +92,14 @@ class PlayerViewModel @Inject constructor(
         }
 
     }
-
+    fun toggleRepeatMode() {
+        when (repeatMode.value) {
+            Player.REPEAT_MODE_OFF -> mctl.repeatMode = Player.REPEAT_MODE_ONE // Set to repeat one track
+            Player.REPEAT_MODE_ONE -> mctl.repeatMode = Player.REPEAT_MODE_ALL // Set to repeat all tracks
+            Player.REPEAT_MODE_ALL -> mctl.repeatMode = Player.REPEAT_MODE_OFF // Set to no repeat
+        }
+        _repeatMode.value = mctl.repeatMode
+    }
     fun setMediaController(mediaController: MediaController) {
         mctl = mediaController
 
@@ -96,6 +108,7 @@ class PlayerViewModel @Inject constructor(
             _curTitle.value = (it.title ?: dTitle).toString()
             _curImage.value = it.artworkUri ?: dImage
         }
+        _repeatMode.value = mctl.repeatMode
 
         mctl.addListener(object : Player.Listener {
             private val retryLimit = 3
@@ -376,6 +389,27 @@ class PlayerViewModel @Inject constructor(
             }
         }
         return ActionResult(false, "Internet error: ${res.code()}")
+    }
+
+    fun playLocal(uri: Uri) {
+        val m = MediaItem.fromUri(uri)
+
+        play(listOf(m))
+    }
+
+    fun playLocal(audio: LocalAudio) {
+        val m = MediaItem.Builder()
+            .setMediaId(audio.name)
+            .setUri(audio.uri)
+            //.setMimeType("audio/opus")
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(audio.name)
+                    .setArtworkUri(audio.artwork ?: lImage )
+                    .setArtist(audio.artist)
+                    .build()
+            ).build()
+        play(listOf(m))
     }
 
     private suspend fun preparePlaylist(infos: List<MediaInfo>): List<MediaItem> {

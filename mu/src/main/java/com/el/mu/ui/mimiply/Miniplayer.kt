@@ -55,6 +55,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.el.mu.PlayerViewModel
@@ -65,11 +66,12 @@ import com.el.mu.R
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun Miniplayer(
-    playerViewModel:PlayerViewModel = hiltViewModel<PlayerViewModel>(LocalView.current.findViewTreeViewModelStoreOwner()!!),
+    playerViewModel: PlayerViewModel = hiltViewModel<PlayerViewModel>(LocalView.current.findViewTreeViewModelStoreOwner()!!),
 ) {
     val mediaImage = playerViewModel.currentImage.collectAsState().value
     val mediaTitle = playerViewModel.currentTitle.collectAsState().value
     val isPlaying = playerViewModel.isPlaying.collectAsState().value
+    val repeatMode = playerViewModel.repeatMode.collectAsState().value
 
     Column(
         modifier = Modifier
@@ -141,29 +143,34 @@ fun Miniplayer(
                         Text(
                             text = mediaTitle,
                             maxLines = 1,
-                            modifier =  Modifier.widthIn(max = edgeWidth * 4)
-                            // Rendering to an offscreen buffer is required to get the faded edges' alpha to be
-                            // applied only to the text, and not whatever is drawn below this composable (e.g. the
-                            // window).
-                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                            .drawWithContent {
-                                drawContent()
-                                drawFadedEdge(leftEdge = true)
-                                drawFadedEdge(leftEdge = false)
-                            }
-                            .basicMarquee(
-                                // Animate forever.
-                                iterations = Int.MAX_VALUE,
-                                spacing = MarqueeSpacing(0.dp)
-                            )
-                            .padding(start = edgeWidth)
+                            modifier = Modifier
+                                .widthIn(max = edgeWidth * 4)
+                                // Rendering to an offscreen buffer is required to get the faded edges' alpha to be
+                                // applied only to the text, and not whatever is drawn below this composable (e.g. the
+                                // window).
+                                .graphicsLayer {
+                                    compositingStrategy = CompositingStrategy.Offscreen
+                                }
+                                .drawWithContent {
+                                    drawContent()
+                                    drawFadedEdge(leftEdge = true)
+                                    drawFadedEdge(leftEdge = false)
+                                }
+                                .basicMarquee(
+                                    // Animate forever.
+                                    iterations = Int.MAX_VALUE,
+                                    spacing = MarqueeSpacing(0.dp)
+                                )
+                                .padding(start = edgeWidth)
                         )
-                        PlayControlsRow(isPlaying, {
+                        PlayControlsRow(repeatMode, isPlaying, {
                             playerViewModel.previous()
                         }, {
                             playerViewModel.togglePlayer()
                         }, {
                             playerViewModel.next()
+                        }, {
+                            playerViewModel.toggleRepeatMode()
                         })
                     }
 
@@ -180,7 +187,8 @@ fun Miniplayer(
                             start.linkTo(parent.start, margin = 30.dp)
                             width = Dimension.value(100.dp)
                             height = Dimension.value(100.dp)
-                        }.background(Color.Transparent)
+                        }
+                        .background(Color.Transparent)
                 ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -212,14 +220,30 @@ fun Miniplayer(
 
 @Composable
 fun PlayControlsRow(
+    repeat: Int,
     isPlaying: Boolean,
     onPreviousClick: () -> Unit,
     onPlayClick: () -> Unit,
-    onNextClick: () -> Unit
+    onNextClick: () -> Unit,
+    onRepeatClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.padding(16.dp)
     ) {
+        Spacer(modifier = Modifier.width(16.dp))
+        val repeatIcon =
+            when (repeat) {
+                Player.REPEAT_MODE_OFF -> painterResource(id = R.drawable.arrow_right_alt)
+                Player.REPEAT_MODE_ONE -> painterResource(id = R.drawable.repeat_one)
+                Player.REPEAT_MODE_ALL -> painterResource(id = R.drawable.repeat_all)
+                else -> painterResource(id = R.drawable.arrow_right_alt)
+            }
+        Icon(painter = repeatIcon,
+            contentDescription = null,
+            modifier = Modifier
+                .clickable { onRepeatClick() }
+                .size(30.dp)
+        )
         Image(
             painter = painterResource(id = R.drawable.skip_previous),
             contentDescription = null,
